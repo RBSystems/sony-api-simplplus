@@ -111,7 +111,7 @@ FUNCTION sendMessage(string resource, string body) {
 	}
 }
 
-FUNTION unblank()
+FUNCTION unblank()
 {
 	body = "{ \"method\": \"setPowerSavingMode\", \"id\": 52, \"params\": [{\"mode\": \"off\"}], \"version\": \"1.0\" }";
 	sendMessage("system",body);
