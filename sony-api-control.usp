@@ -5,7 +5,7 @@
 /*
 Dealer Name: Brigham Young University
 System Name: Sony Display IP Controller
-System Number: 1.2.20
+System Number: 1.2.22
 Programmer: Dan Clegg
 Comments: Communicate with Sony Flat-panel (FWD or XBR) displays
 */
@@ -41,7 +41,7 @@ ANALOG_OUTPUT	speakerVolumeValue,headphoneVolumeValue,volumeToPanel;
 
 STRING_OUTPUT	SelectedSrcCh$,_skip_,ERR_MSG$,RX$,parsedResponse;
 
-DIGITAL_OUTPUT	setToHDMI1,setToHDMI2,setToHDMI3,setToHDMI4,powerIsOn,volumeIsMuted;
+DIGITAL_OUTPUT	setToHDMI1,setToHDMI2,setToHDMI3,setToHDMI4,displayBlanked,powerIsOn,volumeIsMuted;
 
 DIGITAL_OUTPUT _SKIP_,ERR, CommErr;
 
@@ -111,6 +111,13 @@ FUNCTION sendMessage(string resource, string body) {
 	}
 }
 
+FUNCTION unblank()
+{
+	body = "{ \"method\": \"setPowerSavingMode\", \"id\": 52, \"params\": [{\"mode\": \"off\"}], \"version\": \"1.0\" }";
+	sendMessage("system",body);
+	wait(10);
+}
+
 FUNCTION getVolumeValues(){
 	string status[16],speaker[4],headphone[4];
 	//integer placeToReturn,numOfReturnedVolumes;
@@ -144,6 +151,43 @@ FUNCTION getVolumeValues(){
 	}*/
 }
 
+
+STRING_FUNCTION cleanup(string in){
+	string out[1024];
+
+	out = stringUtility.Replace(in,"\"","");
+	out = stringUtility.Replace(out,":","");
+	out = stringUtility.Replace(out,"=","");
+	out = stringUtility.Trim(out);
+	return(out);
+}        
+
+function powerSavingsMode(){
+	string mode[12],body[1024];
+	SIGNED_INTEGER powerSavingsModeOn;
+
+   	body = "{ \"id\": 51, \"method\": \"getPowerSavingMode\", \"params\": [], \"version\": \"1.0\" }";
+	sendMessage("system", body);
+	mode = stringUtility.SonyResult(rx,"mode");
+	mode = cleanup(mode);
+
+	powerSavingsModeOn = CompareStringsNoCase(mode,"pictureOff");
+
+//	LOG(mode);
+//	TRACE("%d",powerSavingsModeOn);
+
+	if (powerSavingsModeOn = 0){
+		powerIsOn = 1;
+		displayBlanked = 1;
+	}
+	else {
+     	powerIsOn = 0;
+		displayBlanked = 0;
+	}
+
+}
+
+
 ///////////////
 // API Method Events
 ///////////////
@@ -159,27 +203,32 @@ PUSH pingHost
 
 RELEASE blankDisplay
 {
-	body = "{ \"id\": 55, \"method\": \"setPowerStatus\", \"params\": [{\"status\": false}],\"version\": \"1.0\" }";
+	//body = "{ \"id\": 55, \"method\": \"setPowerStatus\", \"params\": [{\"status\": false}],\"version\": \"1.0\" }";
+	body = "{ \"method\": \"setPowerSavingMode\", \"id\": 52, \"params\": [{\"mode\": \"pictureOff\"}], \"version\": \"1.0\" }";
 	sendMessage("system", body);
 }
 
 RELEASE switchToHDMI1
 {
+	unblank();
 	body = "{ \"id\": 101, \"method\": \"setPlayContent\", \"params\": [{\"uri\": \"extInput:hdmi?port=1\"}], \"version\": \"1.0\" }";
 	sendMessage("avContent",body);
 }
 RELEASE switchToHDMI2
 {
+	unblank();
 	body = "{ \"id\": 101, \"method\": \"setPlayContent\", \"params\": [{\"uri\": \"extInput:hdmi?port=2\"}], \"version\": \"1.0\" }";
 	sendMessage("avContent",body);
 }
 RELEASE switchToHDMI3
 {
+	unblank();
 	body = "{ \"id\": 101, \"method\": \"setPlayContent\", \"params\": [{\"uri\": \"extInput:hdmi?port=3\"}], \"version\": \"1.0\" }";
 	sendMessage("avContent",body);
 }
 RELEASE switchToHDMI4
 {
+	unblank();
 	body = "{ \"id\": 101, \"method\": \"setPlayContent\", \"params\": [{\"uri\": \"extInput:hdmi?port=4\"}], \"version\": \"1.0\" }";
 	sendMessage("avContent",body);
 }
