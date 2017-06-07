@@ -173,21 +173,25 @@ RELEASE blankDisplay
 
 RELEASE switchToHDMI1
 {
+	unblank();
 	body = "{ \"id\": 101, \"method\": \"setPlayContent\", \"params\": [{\"uri\": \"extInput:hdmi?port=1\"}], \"version\": \"1.0\" }";
 	sendMessage("avContent",body);
 }
 RELEASE switchToHDMI2
 {
+	unblank();
 	body = "{ \"id\": 101, \"method\": \"setPlayContent\", \"params\": [{\"uri\": \"extInput:hdmi?port=2\"}], \"version\": \"1.0\" }";
 	sendMessage("avContent",body);
 }
 RELEASE switchToHDMI3
 {
+	unblank();
 	body = "{ \"id\": 101, \"method\": \"setPlayContent\", \"params\": [{\"uri\": \"extInput:hdmi?port=3\"}], \"version\": \"1.0\" }";
 	sendMessage("avContent",body);
 }
 RELEASE switchToHDMI4
 {
+	unblank();
 	body = "{ \"id\": 101, \"method\": \"setPlayContent\", \"params\": [{\"uri\": \"extInput:hdmi?port=4\"}], \"version\": \"1.0\" }";
 	sendMessage("avContent",body);
 }
